@@ -1,0 +1,26 @@
+
+$beige-bg: #F8F6F2;
+$card-bg: #FFFFFF;
+$border-color: #EAE5E0;
+$text-color: #3D352F;
+$subtle-text: #857D75;
+$primary-brand: #B99C75; 
+$primary-hover: #A68A60;
+$warning-brand: #E3D1B4;
+$danger-brand: #C38673;
+
+
+$primary:       $primary-brand;
+$warning:       $warning-brand;
+$danger:        $danger-brand;
+$body-bg:       $beige-bg;
+$body-color:    $text-color;
+$link-color:    $primary-brand;
+$link-hover-color: $primary-hover;
+$card-border-color: $border-color;
+$card-bg: $card-bg;
+$input-bg: $beige-bg;
+$input-border-color: $border-color;
+
+$input-focus-box-shadow: 0 0 0 0.25rem rgba($primary, 0.4);
+$btn-focus-box-shadow: $input-focus-box-shadow;

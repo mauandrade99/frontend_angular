@@ -1,0 +1,18 @@
+ng serve -o
+
+ng build --base-href /frontend-angular/   (criar pasta dist)
+
+cd\javaProjects\frontend-angular
+git init
+git remote add origin https://github.com/mauandrade99/frontend_angular
+
+cd\javaProjects\frontend-angular
+git init
+git add .
+git commit -m "frontend_angular release 2.0 auditoria"
+git branch -M main
+git push -u origin main
+
+ng build --base-href /frontend-angular/ 
+
+

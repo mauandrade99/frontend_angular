@@ -1,0 +1,267 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" routerLink="/dashboard">
+            <i class="fas fa-home"></i> Angular
+        </a>
+        <button (click)="logout()" class="btn btn-outline-light">
+            Sair <i class="fas fa-sign-out-alt"></i>
+        </button>
+    </div>
+</nav>
+
+<main class="container mt-4">
+    <h2>Bem-vindo, {{ welcomeName }}!</h2>
+    <hr>
+
+    <!-- Seção de Admin: só aparece se 'isAdmin' for true -->
+    <div class="row g-4">
+    <div *ngIf="isAdmin" class="col-lg-7">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-users"></i> Gerenciamento de Usuários</h5>
+            </div>
+            <div class="card-body">
+
+                <!-- Loader: aparece enquanto 'isLoadingUsers' for true -->
+                <div *ngIf="isLoadingUsers" class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                </div>
+
+                <!-- Mensagem de Erro -->
+                <div *ngIf="usersError" class="alert alert-danger">
+                    {{ usersError }}
+                </div>
+
+                <!-- Tabela de Usuários-->
+                <div *ngIf="!isLoadingUsers && usersPage && usersPage.content.length > 0" class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nome</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th style ="min-width:100px">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Loop *ngFor para criar uma linha para cada usuário -->
+                            <tr *ngFor="let user of usersPage.content" 
+                            (click)="onSelectUser(user)" 
+                            [class.table-active]="selectedUser?.id === user.id"
+                            style="cursor: pointer;">
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.nome }}</td>
+                                <td>{{ user.email }}</td>
+                                <td><span class="badge bg-secondary">{{ user.role }}</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning me-2" (click)="openUserEditModal(user); $event.stopPropagation()">
+                                        <i class="fas fa-user-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" (click)="deleteUser(user.id); $event.stopPropagation()">
+                                        <i class="fas fa-trash"></i>
+                                    </button>  
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Controles de Paginação -->
+                <nav *ngIf="!isLoadingUsers && usersPage && usersPage.totalPages > 1">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" [class.disabled]="usersPage.number === 0">
+                            <a class="page-link" href="#" (click)="fetchUsers(usersPage.number - 1); $event.preventDefault()">Anterior</a>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link">{{ usersPage.number + 1 }}&nbsp;de&nbsp;{{ usersPage.totalPages }}</span>
+                        </li>
+                        <li class="page-item" [class.disabled]="usersPage.number + 1 >= usersPage.totalPages">
+                            <a class="page-link" href="#" (click)="fetchUsers(usersPage.number + 1); $event.preventDefault()">Próxima</a>
+                        </li>
+                    </ul>
+                </nav>
+
+            </div>
+        </div>
+    </div>
+
+    <div [ngClass]="isAdmin ? 'col-lg-5' : 'col-12'">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5>
+                    <i class="fas fa-map-marker-alt"></i> 
+                    Endereços de: {{ selectedUser ? selectedUser.nome : 'Ninguém selecionado' }}
+                    
+                </h5>
+                <button *ngIf="selectedUser" (click)="openAddAddressModal()" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus "></i>
+                </button>
+            </div>
+            <div class="card-body">
+                <div *ngIf="isLoadingAddresses" class="text-center">
+                    <div class="spinner-border text-secondary"></div>
+                </div>
+                <div *ngIf="addressesError" class="alert alert-warning">{{ addressesError }}</div>
+
+                <!-- Lista de Endereços -->
+                <div *ngIf="!isLoadingAddresses && selectedUser && addresses.length > 0">
+                    <ul class="list-group">
+                        <li *ngFor="let addr of addresses" class="list-group-item">
+                            <div>
+                                <strong>{{ addr.logradouro }}, {{ addr.numero }}</strong> <br>
+                                {{ addr.bairro }} - {{ addr.cidade }}/{{ addr.estado }} <br>
+                                CEP: {{ addr.cep }}
+                            </div>
+                            <div>
+                                <button (click)="openEditAddressModal(addr)" class="btn btn-sm btn-warning me-2"><i class="fas fa-edit"></i></button>
+                                <button (click)="deleteAddress(addr.id)" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div *ngIf="!isLoadingAddresses && selectedUser && addresses.length === 0">
+                    <p class="text-muted">Nenhum endereço cadastrado para este usuário.</p>
+                </div>
+                
+                <div *ngIf="!selectedUser && !isLoadingAddresses">
+                    <p class="text-muted">Selecione um usuário na lista para ver seus endereços.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</main>
+
+<!-- Modal de Endereço -->
+<div *ngIf="isAddressModalVisible" class="modal fade show" style="display: block;" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form [formGroup]="addressForm" (ngSubmit)="saveAddress()"> 
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ isEditingAddress ? 'Editar' : 'Adicionar' }} Endereço</h5>
+                    <button type="button" class="btn-close" (click)="isAddressModalVisible = false"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="cep" class="form-label">CEP</label>
+                        <input type="text" class="form-control" formControlName="cep" (input)="onCepChange($event)">
+                        <div *ngIf="addressForm.get('cep')?.invalid && addressForm.get('cep')?.touched" class="text-danger mt-1 small">
+                            <div *ngIf="addressForm.get('cep')?.hasError('required')">O CEP é obrigatório.</div>
+                            <div *ngIf="addressForm.get('cep')?.hasError('pattern')">O CEP deve conter 8 dígitos numéricos.</div>
+                            <div *ngIf="addressForm.get('cep')?.hasError('cepInvalido')">CEP não encontrado ou inválido.</div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-9 mb-3">
+                            <label class="form-label">Logradouro</label>
+                            <input type="text" class="form-control" formControlName="logradouro">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Número</label>
+                            <input type="text" class="form-control" formControlName="numero">
+                            <div *ngIf="addressForm.get('numero')?.invalid && addressForm.get('numero')?.touched" class="text-danger mt-1 small">
+                                <div *ngIf="addressForm.get('numero')?.hasError('required')">
+                                    O campo Número é obrigatório.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Bairro</label>
+                        <input type="text" class="form-control" formControlName="bairro">
+                    </div>
+                     <div class="row">
+                        <div class="col-md-9 mb-3">
+                            <label class="form-label">Cidade</label>
+                            <input type="text" class="form-control" formControlName="cidade">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">UF</label>
+                            <input type="text" class="form-control" formControlName="estado">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Complemento</label>
+                        <input type="text" class="form-control" formControlName="complemento">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="isAddressModalVisible = false">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" [disabled]="addressForm.invalid">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="isAddressModalVisible" class="modal-backdrop fade show"></div>
+
+<!-- Modal de Confirmação Genérico -->
+<div *ngIf="isConfirmModalVisible" class="modal fade show" style="display: block;" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">{{ confirmModalTitle }}</h5>
+                <button type="button" class="btn-close btn-close-white" (click)="isConfirmModalVisible = false"></button>
+            </div>
+            <div class="modal-body">
+                <p>{{ confirmModalMessage }}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="isConfirmModalVisible = false">Cancelar</button>
+                <button type="button" class="btn btn-danger" (click)="onConfirmAction()">Sim, Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="isConfirmModalVisible" class="modal-backdrop fade show"></div>
+
+<!-- Modal para Editar Usuário -->
+<div *ngIf="isUserEditModalVisible" class="modal fade show" style="display: block;" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form [formGroup]="userEditForm" (ngSubmit)="saveUser()">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Usuário</h5>
+                    <button type="button" class="btn-close" (click)="isUserEditModalVisible = false"></button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="mb-3">
+                        <label for="user-edit-name" class="form-label">Nome</label>
+                        <input type="text" class="form-control" id="user-edit-name" formControlName="nome">
+                        <div *ngIf="userEditForm.get('nome')?.invalid && userEditForm.get('nome')?.touched" class="text-danger mt-1 small">
+                            <div *ngIf="userEditForm.get('nome')?.hasError('required')">
+                                O campo Nome é obrigatório.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="user-edit-email" class="form-label">Email (não pode ser alterado)</label>
+                        <input type="email" class="form-control" id="user-edit-email" formControlName="email">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="user-edit-role" class="form-label">Permissão</label>
+                        <select class="form-select" id="user-edit-role" formControlName="role">
+                            <option value="ROLE_USER">Usuário Comum</option>
+                            <option value="ROLE_ADMIN">Administrador</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="isUserEditModalVisible = false">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" [disabled]="userEditForm.invalid">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="isUserEditModalVisible" class="modal-backdrop fade show"></div>

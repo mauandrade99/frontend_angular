@@ -1,0 +1,33 @@
+@import "app/styles/variables";
+
+@import "bootstrap/scss/bootstrap";
+
+@import "@fortawesome/fontawesome-free/css/all.css";
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
+h2, h3, h5 {
+  font-weight: 500;
+}
+
+.card {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.form-label {
+  color: $subtle-text;
+  font-weight: 500;
+}
+
+.btn {
+  font-weight: 600;
+}
+
+.btn-danger {
+    color: #FFFFFF;
+}

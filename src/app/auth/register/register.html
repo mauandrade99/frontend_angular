@@ -1,0 +1,69 @@
+<div class="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+  <div class="col-12 col-md-8 col-lg-5 col-xl-4">
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-4 p-md-5">
+        <h3 class="card-title text-center mb-4">Criar Conta</h3>
+        
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+          
+          <div class="mb-3">
+            <label for="name" class="form-label">Nome Completo</label>
+            <input type="text" class="form-control" id="name" formControlName="nome">
+            <div *ngIf="registerForm.get('nome')?.invalid && registerForm.get('nome')?.touched" class="text-danger mt-1 small">
+              Nome é obrigatório.
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" formControlName="email">
+            <div *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched" class="text-danger mt-1 small">
+              <div *ngIf="registerForm.get('email')?.errors?.['required']">Email é obrigatório.</div>
+              <div *ngIf="registerForm.get('email')?.errors?.['email']">Formato de email inválido.</div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">Senha</label>
+            <div class="input-group">
+              <input [type]="hidePassword ? 'password' : 'text'" class="form-control" id="password" formControlName="senha">
+              <button class="btn btn-outline-secondary" type="button" (click)="togglePasswordVisibility()">
+                <i class="fas" [ngClass]="hidePassword ? 'fa-eye' : 'fa-eye-slash'"></i>
+              </button>
+            </div>
+              <div *ngIf="registerForm.get('senha')?.invalid && registerForm.get('senha')?.touched" class="text-danger mt-1 small">
+                <div *ngIf="registerForm.get('senha')?.errors?.['required']">Senha é obrigatória.</div>
+                <div *ngIf="registerForm.get('senha')?.errors?.['minLength']">A senha deve ter no mínimo 6 caracteres.</div>
+              </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="confirm-password" class="form-label">Confirmar Senha</label>
+            <input [type]="hidePassword ? 'password' : 'text'" class="form-control" id="confirm-password" formControlName="confirmarSenha">
+            <div *ngIf="registerForm.get('confirmarSenha')?.errors?.['required']" class="text-danger mt-1 small">Confirmação é obrigatória.</div>
+            <div *ngIf="registerForm.get('confirmarSenha')?.hasError('passwordMismatch') && registerForm.get('confirmarSenha')?.touched" class="text-danger mt-1 small">As senhas não coincidem.</div>
+          </div>
+
+
+          <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-primary" [disabled]="isLoading">
+              <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              {{ isLoading ? 'Registrando...' : 'Registrar' }}
+            </button>
+          </div>
+
+          <div *ngIf="errorMessage" class="alert alert-danger mt-3" role="alert">
+            {{ errorMessage }}
+          </div>
+          <div *ngIf="successMessage" class="alert alert-success mt-3" role="alert">
+            {{ successMessage }}
+          </div>
+        </form>
+
+        <div class="text-center mt-3">
+          <p>Já tem uma conta? <a routerLink="/auth/login">Faça login aqui</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

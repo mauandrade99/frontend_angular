@@ -1,0 +1,49 @@
+<div class="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+  <div class="col-12 col-md-8 col-lg-5 col-xl-4">
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-4 p-md-5">
+        <h3 class="card-title text-center mb-4">Login</h3>
+        
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" formControlName="email">
+            <!-- Mensagens de erro de validação -->
+            <div *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" class="text-danger mt-1 small">
+              <div *ngIf="loginForm.get('email')?.errors?.['required']">Email é obrigatório.</div>
+              <div *ngIf="loginForm.get('email')?.errors?.['email']">Formato de email inválido.</div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">Senha</label>
+            <div class="input-group">
+              <input [type]="hidePassword ? 'password' : 'text'" class="form-control" id="password" formControlName="senha">
+              <button class="btn btn-outline-secondary" type="button" (click)="togglePasswordVisibility()">
+                <i class="fas" [ngClass]="hidePassword ? 'fa-eye' : 'fa-eye-slash'"></i>
+              </button>
+            </div>
+            <div *ngIf="loginForm.get('senha')?.invalid && loginForm.get('senha')?.touched" class="text-danger mt-1 small">
+              <div *ngIf="loginForm.get('senha')?.errors?.['required']">Senha é obrigatória.</div>
+            </div>
+          </div>
+
+          <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-primary" [disabled]="loginForm.invalid || isLoading">
+              <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              {{ isLoading ? 'Entrando...' : 'Entrar' }}
+            </button>
+          </div>
+
+          <div *ngIf="errorMessage" class="alert alert-danger mt-3" role="alert">
+            {{ errorMessage }}
+          </div>
+        </form>
+
+        <div class="text-center mt-3">
+          <p>Não tem uma conta? <a routerLink="/auth/register">Registre-se aqui</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
